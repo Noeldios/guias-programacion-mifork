@@ -516,27 +516,66 @@ El código es más limpio porque no se mezclan resultados con códigos de error.
 
 ## 6. En orientación a objetos, ¿las excepciones suelen ser objetos? ¿Qué ventajas tiene esto en términos de encapsulación? ¿Podemos entonces crear excepciones personalizadas?
 
-### Respuesta
+En Java, las excepciones son objetos.
+
+Esto mejora la encapsulación porque el error contiene datos y comportamiento (mensaje, tipo, causa).
+
+Sí, se pueden crear excepciones personalizadas.
 
 
 ## 7. En relación con las ventajas de la encapsulación, comparando el ejemplo en C con Java. ¿Qué **información esencial** lleva cualquier **objeto excepción** que es muy útil tener cuando se llega a un manejador?
 
-### Respuesta
+Un objeto excepción contiene principalmente:
+
+Tipo de error
+
+Mensaje
+
+Traza de pila (stack trace)
+
+Esto permite saber exactamente dónde ocurrió el fallo.
 
 
 ## 8. En Java, sobre el bloque **"try-catch"**, ¿se pueden tener más de un bloque `catch`? ¿cuántos bloques `catch` se ejecutan?
 
-### Respuesta
+Sí, puede haber varios catch.
+
+Solo se ejecuta un bloque catch, el primero que coincida con el tipo de excepción.
 
 
 ## 9. Si las excepciones producen rupturas en el código llamador, ¿cómo podemos garantizar que se ejecuta siempre finalmente un código necesario para cierre de ficheros, liberacion de recursos, antes de que continúe propagándose la excepción? Pon un ejemplo en Java con `finally`, tanto con `catch` como sin él.
 
-### Respuesta
+finally se usa para ejecutar código siempre, haya error o no.
+try {
+    System.out.println(Calculadora.raiz(-5));
+} catch (Exception e) {
+    System.out.println("Error");
+} finally {
+    System.out.println("Siempre se ejecuta");
+}
+
+También puede existir sin catch:
+
+try {
+    System.out.println("Proceso");
+} finally {
+    System.out.println("Cierre");
+}
+
+
 
 
 ## 10. En Java, el bloque `finally` puede ir sin `catch`? ¿Se ejecuta siempre tanto si ocurre como si no ocurre una excepción? ¿Y si hay un `return` en medio del `try`?
 
-### Respuesta
+Sí, finally puede ir sin catch.
+
+Siempre se ejecuta:
+
+Si hay excepción
+
+Si no hay excepción
+
+Si hay return dentro del try
 
 
 ## 11. En Java, qué son las excepciones **"controladas"** y las **"no controladas"**? ¿Qué papel juega `RuntimeException`? Pon un ejemplo de excepciones típicas controladas y no controladas que incluso nosotros mismos podríamos usar. Haz dos listas con 3 o 4 ejemplos de situación donde se suele preferir una excepción controlada y donde se suele preferir una excepción no controlada.
