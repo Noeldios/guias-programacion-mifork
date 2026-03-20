@@ -329,44 +329,110 @@ La interfaz pública no cambia, solo la implementación interna.
 
 ## 16. Si un atributo va a tener un método "getter" y "setter" públicos, ¿no es mejor declararlo público? ¿Cuál es la convención más habitual sobre los atributos, que sean públicos o privados? ¿Tiene esto algo que ver con las "invariantes de clase"?
 
-### Respuesta
+No es mejor hacer atributos públicos.
+
+La convención es que los atributos sean privados y se acceda mediante getters y setters.
+
+Esto permite mantener invariantes de clase y controlar los cambios.
 
 
 ## 17. ¿Qué significa que una clase sea **inmutable**? ¿qué es un método modificador? ¿Un método modificador es siempre un "setter"? ¿Tiene ventajas que una clase sea inmutable?
 
-### Respuesta
+Una clase inmutable es aquella cuyos objetos no pueden modificarse después de crearse.
+
+Un método modificador es el que cambia el estado del objeto. No todos son setters.
+
+Las clases inmutables tienen ventajas: son más seguras, fáciles de usar y evitan errores.
 
 
 ## 18. ¿Es recomendable incluir métodos "setter" siempre y como convención?
 
-### Respuesta
+No es recomendable incluir setters siempre.
+
+Solo deben incluirse si realmente es necesario modificar el estado del objeto.
 
 
 ## 19. ¿La clase `String` en Java es mutable o inmutable? ¿Qué ocurre al concatenar dos cadenas? ¿Qué debemos hacer si vamos a hacer una operación que implique concatenar muchas veces para construir paso a paso una cadena muy larga?
 
-### Respuesta
+La clase String es inmutable.
+
+Al concatenar, se crea un nuevo objeto String.
+
+Si se hacen muchas concatenaciones, se recomienda usar StringBuilder.
 
 
 ## 20. En POO ¿Cómo se comparan objetos de una misma clase? ¿Por su contenido o por su identidad? ¿Qué es el método equals en Java? ¿Qué hace por defecto? ¿Cómo se deben comparar dos cadenas en Java? 
+Los objetos se pueden comparar por identidad o por contenido.
 
-### Respuesta
+El método equals() compara contenido. Por defecto compara referencias (identidad).
+
+Las cadenas en Java deben compararse con equals(), no con ==.
 
 
 ## 21. ¿Qué son las clases "wrapper" en un lenguaje de programación orientado a objetos? ¿Cómo se hace? ¿Es un proceso automático? ¿Qué ventajas tienen? ¿Todos los lenguajes orientados a objetos tienen tipos primitivos y necesitan wrappers? 
 
-### Respuesta
+Las clases wrapper envuelven tipos primitivos en objetos (int → Integer, etc.).
+
+En Java el proceso puede ser automático (autoboxing).
+
+Permiten usar primitivos como objetos, por ejemplo en colecciones.
+
+No todos los lenguajes necesitan wrappers de la misma forma.
 
 
 ## 22. ¿En POO qué es un **tipo de dato enumerado**? ¿En Java, un tipo de dato enumerado es una clase? ¿Qué ventajas tienen en términos de encapsulación los enumerados en Java?
+Un enum es un tipo con valores fijos.
 
-### Respuesta
+En Java, un enum es una clase especial.
+
+Mejora la encapsulación porque permite añadir atributos y métodos a cada valor.
 
 
 ## 23. Crea un tipo enumerado en Java que se llame `Mes`, con doce posibles instancias y que además proporcione métodos para obtener cuántos días tiene ese mes, el ordinal de ese mes en el año (1-12), empleando atributos privados y constructores del tipo enumerado.
 
-### Respuesta
+enum Mes {
+    ENERO(31), FEBRERO(28), MARZO(31), ABRIL(30),
+    MAYO(31), JUNIO(30), JULIO(31), AGOSTO(31),
+    SEPTIEMBRE(30), OCTUBRE(31), NOVIEMBRE(30), DICIEMBRE(31);
+
+    private int dias;
+
+    Mes(int dias) {
+        this.dias = dias;
+    }
+
+    public int getDias() {
+        return dias;
+    }
+
+    public int getOrden() {
+        return this.ordinal() + 1;
+    }
+}
 
 
 ## 24. Añade a la clase `Mes` del ejercicio anterior cuatro métodos para devolver si ese mes tiene algunos días de invierno, primavera, verano u otoño, indicando con un booleano el hemisferio (norte o sur, parámetro `enHemisferioNorte`). Es decir: `esDePrimavera(boolean esHemisferioNorte)`, `esDeVerano(boolean esHemisferioNorte)`, `esDeOtoño(boolean esHemisferioNorte)`, `esDeInvierno(boolean esHemisferioNorte)`
 
-### Respuesta
+public boolean esDePrimavera(boolean norte) {
+    return norte ?
+        (this == MARZO || this == ABRIL || this == MAYO) :
+        (this == SEPTIEMBRE || this == OCTUBRE || this == NOVIEMBRE);
+}
+
+public boolean esDeVerano(boolean norte) {
+    return norte ?
+        (this == JUNIO || this == JULIO || this == AGOSTO) :
+        (this == DICIEMBRE || this == ENERO || this == FEBRERO);
+}
+
+public boolean esDeOtono(boolean norte) {
+    return norte ?
+        (this == SEPTIEMBRE || this == OCTUBRE || this == NOVIEMBRE) :
+        (this == MARZO || this == ABRIL || this == MAYO);
+}
+
+public boolean esDeInvierno(boolean norte) {
+    return norte ?
+        (this == DICIEMBRE || this == ENERO || this == FEBRERO) :
+        (this == JUNIO || this == JULIO || this == AGOSTO);
+}
