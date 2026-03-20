@@ -580,27 +580,70 @@ Si hay return dentro del try
 
 ## 11. En Java, qué son las excepciones **"controladas"** y las **"no controladas"**? ¿Qué papel juega `RuntimeException`? Pon un ejemplo de excepciones típicas controladas y no controladas que incluso nosotros mismos podríamos usar. Haz dos listas con 3 o 4 ejemplos de situación donde se suele preferir una excepción controlada y donde se suele preferir una excepción no controlada.
 
-### Respuesta
+Controladas (checked): deben declararse o capturarse
 
+No controladas (unchecked): derivadas de RuntimeException
+
+Ejemplos controladas:
+
+IOException
+
+FileNotFoundException
+
+SQLException
+
+Ejemplos no controladas:
+
+NullPointerException
+
+IllegalArgumentException
+
+ArrayIndexOutOfBoundsException
+
+Uso típico:
+
+Controladas → errores externos (ficheros, BD)
+
+No controladas → errores de programación
 
 ## 12. ¿Qué es y para qué se usa `throws`? ¿Por qué es alternativa a capturar una excepción controlada?
 
-### Respuesta
+throws indica que un método puede lanzar una excepción.
+
+Se usa como alternativa a capturarla, delegando el control al método llamador.
 
 
 ## 13. Pon un ejemplo en Java de firma de método que incluya `throws`, de una función que abre un fichero pero que declara que no le interesa menejar la excepción de si el fichero no existe, sino que se propague hacia arriba. Eso sí, acuérdate del `finally`.
 
-### Respuesta
+import java.io.*;
+
+class Fichero {
+    static void abrir() throws IOException {
+        try {
+            FileReader f = new FileReader("datos.txt");
+        } finally {
+            System.out.println("Intento de apertura");
+        }
+    }
+}
 
 
 ## 14. ¿Podemos poner en `throws` excepciones no controladas, como `RuntimeException`? ¿Debería el método llamador entonces poner `try-catch` en ese caso? ¿Qué sentido tendría?
 
-### Respuesta
+Sí, se pueden declarar, pero no es obligatorio.
+
+El llamador no está obligado a usar try-catch, porque son no controladas.
+
+Tiene sentido solo para documentación o claridad.
 
 
 ## 15. ¿Cuándo se recomienda usar excepciones controladas, como `IOException`, y cuándo no controladas como `IllegalArgumentException`? ¿Existen en todos los lenguajes ambas opciones? En los que sólo existe una opción, ¿cuál es la más habitual?
 
-### Respuesta
+##Controladas → cuando el error es externo (fichero, red, BD)
+
+No controladas → cuando es error de programación
+
+No todos los lenguajes tienen ambas. Java es de los más estrictos.
 
 
 ## 16. ¿Tiene sentido lanzar excepciones dentro del `catch`? ¿Se puede relanzar la misma excepción capturada? ¿Cuándo tendría sentido hacer esto último? Pon ejemplos de ambos casos.
