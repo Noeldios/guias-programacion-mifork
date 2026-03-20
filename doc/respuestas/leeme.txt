@@ -226,28 +226,47 @@ public significa accesible desde fuera de la clase. private significa que solo s
 
 ## 6. En Java, ¿A quiénes se pueden aplicar los modificadores `public` o `private`?
 
-### Respuesta
+En Java, public y private se pueden aplicar a atributos, métodos y constructores.
+
+Sirven para controlar la visibilidad de los miembros de una clase.
 
 
 ## 7. En POO, la visibilidad puede ser pública o privada, pero ¿existen más tipos de visibilidad? ¿Qué ocurre en Java? ¿Y en otros lenguajes?
 
-### Respuesta
+Además de public y private, existe la visibilidad por defecto (package-private) y protected.
+
+En Java se usan estos cuatro niveles. Otros lenguajes pueden tener variantes, pero el concepto general es el mismo: controlar el acceso.
 
 
 ## 8. Responde: Los miembros de instancia privados de un objeto están ocultos para (a) otras clases o (b) otras instancias, aunque sean de la misma clase. Pon un ejemplo añadiendo un método `calcularDistanciaAPunto(Punto otro)` y explica la respuesta.
 
-### Respuesta
+Los atributos privados no son accesibles desde otras clases, pero sí desde otras instancias de la misma clase.
+
+class Punto {
+    private double x, y;
+
+    public double calcularDistanciaAPunto(Punto otro) {
+        double dx = this.x - otro.x;
+        double dy = this.y - otro.y;
+        return Math.sqrt(dx*dx + dy*dy);
+    }
+}
+
+Esto es posible porque una instancia de la misma clase puede acceder a los miembros privados de otra instancia de esa clase.
 
 
 ## 9. ¿Qué son los métodos "getter" y "setter" en los lenguajes orientados a objetos?
 
-### Respuesta
+Los getters son métodos que devuelven el valor de un atributo privado.
+
+Los setters son métodos que modifican el valor de un atributo privado de forma controlada.
 
 
 ## 10. Cuando nos referimos a que la ocultación de información mejora la "seguridad" del programa, ¿nos referimos a que no pueda ser "hackeado"?
 
-### Respuesta
+### RespuestaLa “seguridad” no significa protección contra hackers.
 
+Significa evitar errores de programación, como modificar datos de forma incorrecta o romper reglas internas del objeto.
 
 ## 11. ¿Qué diferencia hay entre **miembro de instancia** y **miembro de clase**? ¿Los miembros de clase también se pueden ocultar?
 
