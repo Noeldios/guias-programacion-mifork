@@ -181,12 +181,16 @@ Se observa que el concepto de this se traduce en pasar manualmente el objeto com
 
 ## 1. En Programación Orientada a Objetos (POO), ¿Qué buscan la **encapsulación** y **la ocultación** de información? Enumera brevemente algunas ventajas de la ocultación de información.
 
-### Respuesta
+La encapsulación busca agrupar datos y métodos dentro de una clase y controlar cómo se accede a ellos. La ocultación de información consiste en ocultar los detalles internos de la clase y mostrar solo lo necesario.
+
+La principal ventaja es que se reduce la complejidad, se evita el uso incorrecto de los datos y se mejora el mantenimiento del código. También permite cambiar la implementación interna sin afectar al resto del programa.
 
 
 ## 2. ¿Qué se entiende por la **interfaz pública** de un objeto o clase en POO? Describe brevemente cómo se relaciona con la ocultación de información.
 
-### Respuesta
+La interfaz pública de una clase es el conjunto de métodos y atributos accesibles desde fuera de la clase.
+
+Está formada normalmente por métodos public. La ocultación de información consiste en mantener privados los detalles internos (private) y exponer solo lo necesario mediante la interfaz pública.
 
 
 ## 3. Brevemente: ¿Por qué hay que ser conscientes y diseñar con cuidado la **interfaz pública** de una clase? ¿Es fácil cambiarla?
@@ -196,13 +200,29 @@ Se observa que el concepto de this se traduce en pasar manualmente el objeto com
 
 ## 4. ¿Qué son las **invariantes de clase** y por qué la ocultación de información nos ayuda?
 
-### Respuesta
+La interfaz pública es muy importante porque define cómo se usa la clase desde el exterior. Si está mal diseñada, la clase será difícil de usar o poco flexible.
 
+No es fácil cambiarla, ya que otros programas pueden depender de ella. Por eso debe diseñarse con cuidado desde el principio.
 
 ## 5. Pon un ejemplo de una clase `Punto` en `Java`, con dos coordenadas, `x` e `y`, de tipo `double`, con un método `calcularDistanciaAOrigen`, y que haga uso de la ocultación de información. ¿Cuál es la interfaz pública de la clase `Punto`? ¿Qué significa `public` y `private`?
 
-### Respuesta
+class Punto {
+    private double x;
+    private double y;
 
+    public Punto(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public double calcularDistanciaAOrigen() {
+        return Math.sqrt(x*x + y*y);
+    }
+}
+
+La interfaz pública está formada por el constructor y el método calcularDistanciaAOrigen.
+
+public significa accesible desde fuera de la clase. private significa que solo se puede usar dentro de la propia clase.
 
 ## 6. En Java, ¿A quiénes se pueden aplicar los modificadores `public` o `private`?
 
