@@ -648,9 +648,26 @@ No todos los lenguajes tienen ambas. Java es de los más estrictos.
 
 ## 16. ¿Tiene sentido lanzar excepciones dentro del `catch`? ¿Se puede relanzar la misma excepción capturada? ¿Cuándo tendría sentido hacer esto último? Pon ejemplos de ambos casos.
 
-### Respuesta
+### RespuestaSí, se puede lanzar dentro de un catch.
 
+También se puede relanzar la misma excepción.
+
+try {
+    int x = 5 / 0;
+} catch (ArithmeticException e) {
+    throw new RuntimeException("Error matemático", e);
+}
+
+Se hace cuando se quiere añadir contexto o transformar el error.
 
 ## 17. ¿En qué consiste que una excepción sea la **"causa"** de otra excepción? Pon un ejemplo en Java, donde capturemos una excepción de bajo nivel y la encapsulemos en otra personalizada de alto nivel. Cuando una excepción sale por pantalla y tiene una causa, ¿se ve?
 
-### Respuesta
+Una excepción puede contener otra como causa, formando una cadena de errores.
+
+try {
+    Integer.parseInt("a");
+} catch (NumberFormatException e) {
+    throw new RuntimeException("Error de conversión", e);
+}
+
+Sí, la causa se muestra en el stack trace, permitiendo ver el origen real del problema.
