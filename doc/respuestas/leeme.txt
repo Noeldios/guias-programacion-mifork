@@ -264,33 +264,67 @@ Los setters son métodos que modifican el valor de un atributo privado de forma 
 
 ## 10. Cuando nos referimos a que la ocultación de información mejora la "seguridad" del programa, ¿nos referimos a que no pueda ser "hackeado"?
 
-### RespuestaLa “seguridad” no significa protección contra hackers.
+La “seguridad” no significa protección contra hackers.
 
 Significa evitar errores de programación, como modificar datos de forma incorrecta o romper reglas internas del objeto.
 
 ## 11. ¿Qué diferencia hay entre **miembro de instancia** y **miembro de clase**? ¿Los miembros de clase también se pueden ocultar?
+Un miembro de instancia pertenece a cada objeto individual. Un miembro de clase (static) pertenece a la clase en general.
 
-### Respuesta
+Los miembros de clase también pueden ser private o public, igual que los de instancia.
 
 
 ## 12. Brevemente: ¿Tiene sentido que los constructores sean privados?
+Sí, puede tener sentido. Se usan para controlar la creación de objetos.
 
-### Respuesta
+Por ejemplo, en patrones como factoría o singleton, donde no se quiere permitir crear objetos libremente.
 
 
 ## 13. ¿Cómo se indican los **miembros de clase** en Java? Pon un ejemplo, en la clase `Punto` definida anteriormente, para que incluya miembros de clase que permitan saber cuáles son los valores `x` e `y` máximos que se han establecido en todos los puntos que se hayan creado hasta el momento.
 
-### Respuesta
+Los miembros de clase se indican con static.
+
+class Punto {
+    private double x, y;
+
+    private static double maxX = Double.NEGATIVE_INFINITY;
+    private static double maxY = Double.NEGATIVE_INFINITY;
+
+    public Punto(double x, double y) {
+        this.x = x;
+        this.y = y;
+
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+    }
+}
 
 
 ## 14. Como sería un método factoría dentro de la clase `Punto` para construir un `Punto` a partir de dos coordenadas, pero que las redondee al entero más cercano. Escribe sólo el código del método, no toda la clase ¿Has usado `static`? 
 
-### Respuesta
+static Punto crearPuntoRedondeado(double x, double y) {
+    return new Punto(Math.round(x), Math.round(y));
+}
+
+Sí, se ha usado static porque el método pertenece a la clase y no a un objeto.
 
 
 ## 15. Cambia la implementación de `Punto`. En vez de dos `double`, emplea un array interno de dos posiciones, intentando no modificar la interfaz pública de la clase.
 
-### Respuesta
+class Punto {
+    private double[] coords = new double[2];
+
+    public Punto(double x, double y) {
+        coords[0] = x;
+        coords[1] = y;
+    }
+
+    public double calcularDistanciaAOrigen() {
+        return Math.sqrt(coords[0]*coords[0] + coords[1]*coords[1]);
+    }
+}
+
+La interfaz pública no cambia, solo la implementación interna.
 
 
 ## 16. Si un atributo va a tener un método "getter" y "setter" públicos, ¿no es mejor declararlo público? ¿Cuál es la convención más habitual sobre los atributos, que sean públicos o privados? ¿Tiene esto algo que ver con las "invariantes de clase"?
