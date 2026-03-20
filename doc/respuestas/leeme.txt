@@ -443,27 +443,75 @@ public boolean esDeInvierno(boolean norte) {
 
 ## 1. Empecemos un tema sobre control de errores en lenguajes de programación, con algo básico. En C, donde no existen las excepciones, pongamos un ejemplo de una raíz que toma número flotante positivo. Queremos controlar el error si la función recibe un número negativo. El usuario debe ser informado pero desde fuera de la función `raiz` ¿Cómo indicamos ese error?. Enumera dos opciones diferentes de diseñar, poniendo un ejemplo de código de cada una.
 
-### Respuesta
+En C no existen excepciones, por lo que el error se controla con valores de retorno o variables de estado.
+double raiz(double x) {
+    if (x < 0) return -1;
+    return sqrt(x);
+}
+
+El llamador comprueba el valor devuelto.
+
+double raiz(double x, int *error) {
+    if (x < 0) {
+        *error = 1;
+        return 0;
+    }
+    *error = 0;
+    return sqrt(x);
+}
+
+El error se comunica fuera de la función mediante un parámetro.
 
 
 ## 2. Brevemente ¿Qué es una **"excepción"**? ¿Con qué objetivo las usa un programador cuando implementa funciones o cuando las llama?
 
-### Respuesta
+Una excepción es un mecanismo para indicar errores en tiempo de ejecución.
+
+Permite separar el código normal del código de error. Se usa para propagar errores automáticamente hasta que alguien los controle.
 
 
 ## 3. Reescribe el mismo ejemplo de raiz, pero en Java, metiendo ese método en una clase `Calculadora` y llama a dicho método desde el método `main`, mostrando cómo se puede controlar desde fuera.
 
-### Respuesta
+class Calculadora {
+    static double raiz(double x) {
+        if (x < 0) throw new IllegalArgumentException("Negativo");
+        return Math.sqrt(x);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        try {
+            System.out.println(Calculadora.raiz(-5));
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+}
 
 
 ## 4. ¿Qué es **"lanzar"** una excepción? ¿Qué es **"controlar"** o **"capturar"** una excepción? ¿Qué es que se **"propague"** una excepción? ¿Qué le va ocurriendo a las funciones en la pila de llamadas por donde se va propagando la excepción? ¿Las funciones que no la controlan se reanudan después de alguna forma? Explica con el mismo ejemplo anterior en Java de la raíz cuadrada.
 
-### Respuesta
+Lanzar (throw) = crear una excepción cuando ocurre un error.
+Capturar (catch) = manejar la excepción cuando ocurre.
+Propagar = dejar que la excepción suba por la pila de llamadas.
 
+class Calculadora {
+    static double raiz(double x) {
+        if (x < 0) throw new IllegalArgumentException();
+        return Math.sqrt(x);
+    }
+}
+
+Si no se captura, la excepción sube por las funciones llamadas hasta main.
+
+Las funciones intermedias que no la capturan no continúan después del error, se aborta su ejecución.
 
 ## 5. ¿Qué ventajas tiene frente a C, la **"propagación natural"** de las excepciones a través de la pila (*stack*) de llamadas?
 
-### Respuesta
+La propagación automática evita comprobar errores en cada nivel.
+
+El código es más limpio porque no se mezclan resultados con códigos de error. Además, se centraliza el manejo en un solo punto.
 
 
 ## 6. En orientación a objetos, ¿las excepciones suelen ser objetos? ¿Qué ventajas tiene esto en términos de encapsulación? ¿Podemos entonces crear excepciones personalizadas?
