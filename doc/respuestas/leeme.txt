@@ -173,3 +173,5 @@ double calculaDistanciaAOrigen(struct Punto* p) {
 En este caso, la función recibe explícitamente un puntero al struct. Esto sustituye al uso implícito de this en Java.
 
 Se observa que el concepto de this se traduce en pasar manualmente el objeto como parámetro, lo que hace el código menos encapsulado.
+
+.
