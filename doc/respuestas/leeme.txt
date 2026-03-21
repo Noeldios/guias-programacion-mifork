@@ -195,15 +195,15 @@ Está formada normalmente por métodos public. La ocultación de información co
 
 ## 3. Brevemente: ¿Por qué hay que ser conscientes y diseñar con cuidado la **interfaz pública** de una clase? ¿Es fácil cambiarla?
 
-La interfaz pública es importante porque es cómo se usa la clase.
-
-Es difícil de cambiar porque otros programas pueden depender de ella.
-
-## 4. ¿Qué son las **invariantes de clase** y por qué la ocultación de información nos ayuda?
-
 La interfaz pública es muy importante porque define cómo se usa la clase desde el exterior. Si está mal diseñada, la clase será difícil de usar o poco flexible.
 
 No es fácil cambiarla, ya que otros programas pueden depender de ella. Por eso debe diseñarse con cuidado desde el principio.
+
+## 4. ¿Qué son las **invariantes de clase** y por qué la ocultación de información nos ayuda?
+
+Una invariante es una regla que siempre debe cumplirse en el objeto (ej: edad ≥ 0).
+
+La encapsulación ayuda porque evita modificar datos sin control.
 
 ## 5. Pon un ejemplo de una clase `Punto` en `Java`, con dos coordenadas, `x` e `y`, de tipo `double`, con un método `calcularDistanciaAOrigen`, y que haga uso de la ocultación de información. ¿Cuál es la interfaz pública de la clase `Punto`? ¿Qué significa `public` y `private`?
 
