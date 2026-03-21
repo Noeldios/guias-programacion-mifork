@@ -195,8 +195,9 @@ Está formada normalmente por métodos public. La ocultación de información co
 
 ## 3. Brevemente: ¿Por qué hay que ser conscientes y diseñar con cuidado la **interfaz pública** de una clase? ¿Es fácil cambiarla?
 
-### Respuesta
+La interfaz pública es importante porque es cómo se usa la clase.
 
+Es difícil de cambiar porque otros programas pueden depender de ella.
 
 ## 4. ¿Qué son las **invariantes de clase** y por qué la ocultación de información nos ayuda?
 
