@@ -672,3 +672,142 @@ try {
 }
 
 Sí, la causa se muestra en el stack trace, permitiendo ver el origen real del problema.
+
+
+
+
+
+# Tema 4.1. Composición
+
+
+## 1. En C, podemos crear estructuras mayores **componiendo** unas con otras, que suelen describirse como "A tiene-un/tiene-varios B". Pon un ejemplo, empleando `struct`, de una línea de puntos, donde puntos tienen dos coordenadas (`x` e `y`), y la línea esta hecha de dos puntos. Incluye una función para calcular la distancia entre puntos y otra para hallar la longitud de una línea.
+
+En C, la composición puede realizarse incluyendo una estructura dentro de otra. De esta manera, una estructura más compleja puede construirse a partir de estructuras más simples. En este ejemplo, una línea estará formada por dos puntos, y cada punto tendrá dos coordenadas: x e y.
+
+La relación que se modela es de tipo “Linea tiene dos Punto”. Esto permite organizar mejor la información y reutilizar estructuras ya definidas. Además, las funciones pueden trabajar directamente con estas estructuras para realizar cálculos geométricos, como la distancia entre dos puntos o la longitud de una línea.
+
+
+#include <stdio.h>
+#include <math.h>
+
+struct Punto {
+    double x;
+    double y;
+};
+
+struct Linea {
+    struct Punto inicio;
+    struct Punto fin;
+};
+
+double distancia(struct Punto a, struct Punto b) {
+    double dx = b.x - a.x;
+    double dy = b.y - a.y;
+
+    return sqrt(dx * dx + dy * dy);
+}
+
+double longitud(struct Linea l) {
+    return distancia(l.inicio, l.fin);
+}
+
+int main() {
+    struct Punto p1 = {0, 0};
+    struct Punto p2 = {3, 4};
+
+    struct Linea linea = {p1, p2};
+
+    printf("Longitud: %.2f\n", longitud(linea));
+
+    return 0;
+}
+
+En este caso, la función distancia calcula la separación entre dos puntos usando el teorema de Pitágoras. Después, la función longitud reutiliza esa función para calcular la longitud de una línea completa a partir de sus puntos inicial y final.
+
+
+
+## 2. Ahora transforma ese ejemplo a orientación a objetos con Java, para tener un primer ejemplo de **composición** en orientación a objetos. Crea una clase `Punto`, y una clase `Linea`. La clase `Punto` debe tener un método para calcular distancia a otro `Punto` y `Linea` debe tener un método para calcular su longitud. Gracias a la ocultación de información, supera a C, garantizando que los puntos sean inmutables, al igual que la línea, que una vez creada, no queremos que se modifique de qué a qué puntos va dicha línea.  
+
+En Java, la composición se realiza haciendo que una clase tenga objetos de otra clase como atributos. En este ejemplo, la clase Linea estará compuesta por dos objetos de tipo Punto. A diferencia de C, Java permite aplicar ocultación de información mediante atributos privados y controlar cómo se accede a ellos.
+
+Para conseguir inmutabilidad, los atributos se declaran como private final, y no se crean métodos modificadores (setters). Así, una vez creado un objeto Punto o Linea, sus valores no podrán cambiarse. Esto aumenta la seguridad y evita modificaciones accidentales del estado de los objetos.
+
+public class Punto {
+    private final double x;
+    private final double y;
+
+    public Punto(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public double distancia(Punto otro) {
+        double dx = otro.x - this.x;
+        double dy = otro.y - this.y;
+
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+}
+
+public class Linea {
+    private final Punto inicio;
+    private final Punto fin;
+
+    public Linea(Punto inicio, Punto fin) {
+        this.inicio = inicio;
+        this.fin = fin;
+    }
+
+    public Punto getInicio() {
+        return inicio;
+    }
+
+    public Punto getFin() {
+        return fin;
+    }
+
+    public double longitud() {
+        return inicio.distancia(fin);
+    }
+}
+
+La principal ventaja respecto a C es que el estado interno queda protegido. No es posible modificar directamente las coordenadas de un punto ni cambiar los extremos de una línea después de crearla. Además, cada clase se responsabiliza de sus propias operaciones, siguiendo el principio de encapsulación propio de la orientación a objetos.
+
+## 3. ¿Qué significa la **multiplicidad** en la composición? En el ejemplo anterior, ¿cuál es la multiplicidad entre `Linea` y `Punto`? Indícalo expresando la multiplicidad en ambas direcciones, de `Linea` a `Punto` y de `Punto` a `Linea`.
+
+La multiplicidad indica cuántos objetos de una clase pueden relacionarse con objetos de otra clase dentro de una asociación o composición. Se utiliza en diseño orientado a objetos para describir relaciones entre clases de forma más precisa.
+
+En el ejemplo anterior, una Linea está formada exactamente por dos objetos Punto: uno de inicio y otro de fin. Por tanto, la multiplicidad de Linea hacia Punto es 2, ya que cada línea necesita exactamente dos puntos para existir.
+
+En sentido contrario, un Punto puede pertenecer a ninguna, una o varias líneas diferentes. Un mismo punto podría reutilizarse como extremo de muchas líneas distintas. Por ello, la multiplicidad de Punto hacia Linea sería 0..*, que significa “cero o muchas”.
+
+Estas multiplicidades ayudan a entender cómo se relacionan los objetos y qué restricciones existen entre ellos. Son especialmente útiles al diseñar diagramas UML y estructuras de clases más complejas.
+
+
+## 4. ¿Qué significa composición **fuerte** y composición **débil**? ¿Qué consecuencia implica en relación al ciclo de vida de los objetos? Indica a cuál solemos referirnos como **"asociación o agregación"** y a cuál como **"composición"** propiamente.
+
+La composición fuerte ocurre cuando un objeto propietario controla completamente la existencia de los objetos que contiene. Esto significa que los objetos internos no suelen existir de manera independiente y dependen del ciclo de vida del objeto principal.
+
+Por ejemplo, si una clase Casa crea y destruye directamente sus objetos Habitacion, las habitaciones dejarán de existir cuando desaparezca la casa. A esta relación fuerte es a la que normalmente se denomina “composición” propiamente dicha.
+
+La composición débil ocurre cuando los objetos relacionados pueden existir de forma independiente. El objeto principal simplemente mantiene una referencia hacia otros objetos, pero no controla completamente su creación ni su destrucción. A este tipo de relación suele llamársele “agregación” o “asociación”.
+
+La diferencia principal está en el ciclo de vida de los objetos. En la composición fuerte, el objeto contenido depende del contenedor para existir. En la composición débil, ambos objetos pueden seguir existiendo por separado aunque la relación desaparezca.
+
+## 5. Cuando una clase usa a otra al recibirla o devolverla como parámetro en algún método, al hacer `new` dentro de un método, o al usarlas como variables locales, ¿hablamos de composición o de **"dependencia"**?
+
+Cuando una clase utiliza otra únicamente de manera temporal, por ejemplo como parámetro de un método, valor de retorno, variable local o creando objetos dentro de un método, se habla de dependencia y no de composición.
+
+La composición implica que un objeto mantiene otro objeto como parte de su estado interno mediante atributos. En cambio, la dependencia representa un uso puntual o temporal entre clases, sin que exista una relación permanente almacenada dentro del objeto.
+
+Por ejemplo, si una clase Calculadora recibe un objeto Punto en un método para realizar un cálculo, existe dependencia porque el objeto se usa momentáneamente. Sin embargo, si una clase Linea guarda dos objetos Punto como atributos, entonces sí existe composición.
+
+Las dependencias son relaciones más débiles que la composición. Aun así, siguen siendo importantes porque indican qué clases necesitan conocer o utilizar a otras para funcionar correctamente.
