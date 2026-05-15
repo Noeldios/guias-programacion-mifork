@@ -1422,3 +1422,96 @@ La herencia introduce un acoplamiento fuerte entre clases, ya que las subclases 
 
 En cambio, con composición, las relaciones son más flexibles y reemplazables en tiempo de diseño. Esto permite cambiar comportamientos sin modificar jerarquías completas, lo que mejora la mantenibilidad, reutilización y extensibilidad del sistema.
 
+
+## 12. Herencia vs. Composición. Se dice que la *"herencia rompe la encapsulación"*, ¿a qué se refiere esto?
+
+Se dice que la herencia puede romper la encapsulación porque una subclase queda dependiente de los detalles internos de implementación de la superclase. Aunque los atributos estén declarados como private, el comportamiento heredado sigue condicionado por cómo está implementada la clase base, lo que crea un acoplamiento fuerte entre ambas.
+
+Además, la subclase puede verse afectada por cambios en la superclase sin que exista una interfaz explícita que lo controle. Por ejemplo, si se modifica un método heredado o se añade lógica interna, las subclases pueden cambiar su comportamiento de forma inesperada, incluso sin modificar su código.
+
+Esto provoca que la superclase no esté completamente “encapsulada” como unidad independiente, ya que su diseño interno influye directamente en el comportamiento de las clases hijas. Por eso se dice que la herencia expone más de lo deseable en comparación con la composición, donde las dependencias están más controladas.
+
+
+
+## 13. Pongamos un ejemplo de dos alternativas para lo mismo. Tenemos un `Estudiante` y un `Trabajador`, ambos tienen datos en común: el DNI y el nombre. Modelemos esto de dos formas: uno por herencia, con una superclase `Persona`, y otro con composición, con una clase `DatosPersonales`. Se debe recibir una instancia de `DatosPersonales` en el constructor de la clase `Estudiante` y `Trabajador`.
+
+En el modelo basado en herencia, se utiliza una superclase Persona que contiene los datos comunes (dni y nombre). Tanto Estudiante como Trabajador heredan directamente de ella, reutilizando esos atributos y comportamiento común. Este enfoque representa una relación “es-un”.
+
+public class Persona {
+    private String dni;
+    private String nombre;
+
+    public Persona(String dni, String nombre) {
+        this.dni = dni;
+        this.nombre = nombre;
+    }
+
+    public String getDni() {
+        return dni;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+}
+
+public class Estudiante extends Persona {
+    public Estudiante(String dni, String nombre) {
+        super(dni, nombre);
+    }
+}
+
+public class Trabajador extends Persona {
+    public Trabajador(String dni, String nombre) {
+        super(dni, nombre);
+    }
+}
+
+En el modelo basado en composición, los datos comunes se encapsulan en una clase independiente llamada DatosPersonales. Tanto Estudiante como Trabajador reciben una instancia de esta clase en su constructor y la almacenan como atributo. Esto representa una relación “tiene-un”.
+
+
+public class DatosPersonales {
+    private final String dni;
+    private final String nombre;
+
+    public DatosPersonales(String dni, String nombre) {
+        this.dni = dni;
+        this.nombre = nombre;
+    }
+
+    public String getDni() {
+        return dni;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+}
+
+
+public class Estudiante {
+    private final DatosPersonales datos;
+
+    public Estudiante(DatosPersonales datos) {
+        this.datos = datos;
+    }
+
+    public DatosPersonales getDatos() {
+        return datos;
+    }
+}
+
+public class Trabajador {
+    private final DatosPersonales datos;
+
+    public Trabajador(DatosPersonales datos) {
+        this.datos = datos;
+    }
+
+    public DatosPersonales getDatos() {
+        return datos;
+    }
+}
+
+En el enfoque con composición, los datos personales se reutilizan sin necesidad de crear jerarquías. Esto permite mayor flexibilidad, ya que DatosPersonales puede utilizarse en otras clases sin forzar una relación de herencia, mientras que en el modelo de herencia toda la estructura queda acoplada a la clase Persona.
+
