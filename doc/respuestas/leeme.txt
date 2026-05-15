@@ -1515,3 +1515,98 @@ public class Trabajador {
 
 En el enfoque con composición, los datos personales se reutilizan sin necesidad de crear jerarquías. Esto permite mayor flexibilidad, ya que DatosPersonales puede utilizarse en otras clases sin forzar una relación de herencia, mientras que en el modelo de herencia toda la estructura queda acoplada a la clase Persona.
 
+
+
+# Tema 5. Polimorfismo
+
+## 1. Brevemente, ¿qué es el **"polimorfismo"** y para qué sirve en programación orientada a objetos? ¿qué es la **"sobreescritura"** de métodos?
+
+El polimorfismo es un mecanismo de la programación orientada a objetos que permite que una misma referencia de tipo general pueda comportarse de diferentes maneras según el objeto real al que apunte. En otras palabras, permite tratar objetos de distintas subclases como si fueran de su clase base, pero ejecutando su comportamiento específico.
+
+Su utilidad principal es la extensibilidad y la flexibilidad del código, ya que permite escribir algoritmos genéricos que funcionan con una superclase sin necesidad de conocer todos los tipos concretos derivados. Esto reduce la necesidad de estructuras condicionales basadas en tipos.
+
+La sobreescritura de métodos (overriding) ocurre cuando una subclase redefine un método heredado de la superclase, proporcionando una implementación específica. De este modo, el mismo método puede tener comportamientos distintos dependiendo del tipo real del objeto.
+
+
+## 2. ¿En qué consiste la **"ligadura dinámica"** o **"enlace tardío"**? ¿qué relación tiene con el polimorfismo? ¿hay que indicarlos explícitamente al programar o depende esto del lenguaje? Compara C++ y Java. Indicalo después también para Python.
+
+La ligadura dinámica (o enlace tardío) consiste en que la decisión de qué método ejecutar no se toma en tiempo de compilación, sino en tiempo de ejecución. Es decir, el sistema determina en ejecución qué implementación concreta de un método debe llamarse según el tipo real del objeto.
+
+Este mecanismo es la base del polimorfismo en tiempo de ejecución, ya que permite que una referencia de tipo general invoque métodos que se resuelven dinámicamente según la subclase real. Sin ligadura dinámica, el polimorfismo quedaría muy limitado.
+
+En Java, la ligadura dinámica ocurre automáticamente para métodos de instancia, sin necesidad de indicarlo explícitamente. En C++, en cambio, es necesario declarar los métodos como virtual para habilitar este comportamiento. En Python, este comportamiento es el predeterminado debido a su naturaleza dinámica, ya que los métodos se resuelven en tiempo de ejecución sin necesidad de palabras clave adicionales.
+
+
+## 3. Pon un ejemplo sencillo en Java, de un `Soldado`, con un método `saluda`, con dos subclases: `Zapador` y `Artillero`, donde `Zapador` sobreescribe el método `saludar`, sustituyendo por completo su comportamiento. Ilustra el funcionamiento del polimorfismo creando un array de `Soldados` de dos tipos y luego recorriéndolo empleando referencias de tipo `Soldado` y llamando a `saludar`.
+
+El polimorfismo permite que un mismo método tenga comportamientos distintos dependiendo del tipo real del objeto. En este caso, Zapador redefine completamente el método saludar, mientras que Artillero puede mantener el comportamiento original de Soldado.
+
+public class Soldado {
+    public void saludar() {
+        System.out.println("Soy un soldado");
+    }
+}
+
+public class Zapador extends Soldado {
+    @Override
+    public void saludar() {
+        System.out.println("Soy un zapador especializado");
+    }
+}
+
+public class Artillero extends Soldado {
+    public void saludar() {
+        System.out.println("Soy un artillero preparado");
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+
+        Soldado[] soldados = {
+            new Soldado(),
+            new Zapador(),
+            new Artillero()
+        };
+
+        for (Soldado s : soldados) {
+            s.saludar();
+        }
+    }
+}
+
+En el recorrido del array se observa que, aunque la referencia es de tipo Soldado, el método ejecutado depende del tipo real del objeto. Esto demuestra el comportamiento polimórfico mediante ligadura dinámica.
+
+
+## 4. Si sobreescribo un método, ¿puedo invocar el método base para trabajar a partir de su resultado? Haz que zapador cambie ligeramente la forma de saludar, que salude de forma normal, tal cual hace el soldado base, pero que además añada un "ZAPADOR A SUS ORDENES" ¿qué palabra clave del lenguaje has usado para invocar al método de la clase base?
+
+Cuando se sobreescribe un método, es posible reutilizar el comportamiento de la clase base y ampliarlo en la subclase. Esto permite modificar parcialmente la lógica sin perder la funcionalidad original definida en la superclase.
+
+En Java, para invocar el método de la clase base desde una subclase se utiliza la palabra clave super. Esta palabra permite acceder a la implementación original del método heredado.
+
+public class Soldado {
+    public void saludar() {
+        System.out.println("Soy un soldado");
+    }
+}
+
+public class Zapador extends Soldado {
+
+    @Override
+    public void saludar() {
+        super.saludar();
+        System.out.println("ZAPADOR A SUS ORDENES");
+    }
+}
+
+En este caso, el método saludar del Zapador primero ejecuta el comportamiento del Soldado y luego añade su propio mensaje, demostrando una extensión del comportamiento base.
+
+
+## 5. Al sobreescribir un método en Java, ¿qué restricciones existen sobre los tipos de los parámetros y el tipo de retorno? ¿Qué diferencia hay entre sobreescritura (*overriding*) y sobrecarga (*overloading*)? ¿Para qué sirve la anotación `@Override` y por qué es recomendable usarla siempre?
+
+Al sobreescribir un método en Java, la firma del método debe coincidir con la de la clase base, es decir, los parámetros deben ser exactamente los mismos en tipo y orden. El tipo de retorno debe ser el mismo o un subtipo covariante del definido en la superclase. No se permite cambiar la lista de parámetros.
+
+La sobreescritura (overriding) ocurre cuando una subclase redefine un método heredado con la misma firma, modificando su comportamiento. En cambio, la sobrecarga (overloading) consiste en definir varios métodos con el mismo nombre pero con diferentes parámetros dentro de la misma clase, sin relación de herencia necesaria.
+
+La anotación @Override sirve para indicar explícitamente que un método está siendo sobreescrito. Aunque no es obligatoria, es recomendable porque permite al compilador detectar errores, como firmas incorrectas o intentos fallidos de sobreescritura, evitando así errores difíciles de depurar en tiempo de ejecución.
+
