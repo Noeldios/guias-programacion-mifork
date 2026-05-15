@@ -1318,3 +1318,107 @@ public class Main {
 
 En este ejemplo, el array contiene referencias de tipo Soldado, pero algunos objetos reales son Artillero. Gracias a instanceof, puede comprobarse el tipo real antes de realizar el downcasting y acceder así a métodos específicos del subtipo.
 
+
+## 6. Respecto a la ocultación de información y herencia, ¿qué significa acceso **"protegido"** de métodos y/o atributos? ¿Cómo se implementa en Java? Pon un ejemplo de uso de en la clase `Soldado` para que su nombre sea protegido y pueda usarse en el método de poner bombas del `Zapador`.
+
+El acceso protegido (protected) en orientación a objetos es un nivel de visibilidad intermedio entre private y public. Permite que los atributos y métodos sean accesibles desde la propia clase, desde sus subclases y también desde clases del mismo paquete. Esto resulta especialmente útil en herencia, ya que permite reutilizar estado y comportamiento sin exponer completamente los datos al exterior.
+
+En Java, el modificador protected se utiliza delante del atributo o método. A diferencia de private, las subclases pueden acceder directamente a los miembros protegidos de la superclase, lo que facilita la extensión del comportamiento sin necesidad de getters en todos los casos.
+
+public class Soldado {
+    protected String nombre;
+
+    public Soldado(String nombre) {
+        this.nombre = nombre;
+    }
+}
+
+public class Zapador extends Soldado {
+
+    public Zapador(String nombre) {
+        super(nombre);
+    }
+
+    public void ponerMinas() {
+        System.out.println(nombre + " está colocando minas");
+    }
+}
+
+En este ejemplo, el atributo nombre es accesible directamente desde Zapador gracias a protected. Esto permite reutilizar el estado heredado sin romper la encapsulación completamente, aunque sigue siendo más expuesto que private.
+
+
+## 7. En los lenguajes orientados a objetos ¿hay una **clase base** para todos los objetos? ¿Ocurre en todos los lenguajes? ¿Qué ocurre en Java?
+
+En muchos lenguajes orientados a objetos existe una clase raíz común de la que heredan todos los demás tipos. Esta idea permite tratar cualquier objeto de forma genérica y definir comportamientos básicos compartidos, como comparación o representación en texto.
+
+Sin embargo, esto no ocurre en todos los lenguajes. En algunos sistemas de herencia más primitivos o basados en prototipos, como JavaScript, no existe una única clase base explícita, sino otro mecanismo de delegación.
+
+En Java sí existe una clase base universal llamada Object. Todas las clases creadas heredan directa o indirectamente de Object, incluso si no se indica explícitamente. Esto permite que cualquier objeto pueda ser tratado de forma genérica y que disponga de métodos comunes como toString(), equals() o hashCode().
+
+
+## 8. ¿Qué es la **"herencia múltiple"**? ¿Existe en Java herencia múltiple?
+
+La herencia múltiple es la capacidad de una clase para heredar de más de una clase base al mismo tiempo. Esto permitiría combinar comportamiento y estado de varias clases superiores en una sola subclase.
+
+Este mecanismo puede generar problemas de ambigüedad, como el conflicto de qué implementación usar si dos superclases definen el mismo método. Por este motivo, no todos los lenguajes lo permiten de forma directa.
+
+En Java no existe herencia múltiple de clases. Es decir, una clase solo puede extender una única clase padre. Sin embargo, Java permite una forma limitada de herencia múltiple a través de interfaces, lo que evita muchos de los problemas clásicos de ambigüedad.
+
+
+## 9. Las excepciones en los lenguajes orientados a objetos son objetos. Por tanto, se pueden crear excepciones personalizadas. Pon un ejemplo en Java de una excepción personalizada (`UsuarioNoEncontradoException`), que sea *no controlada* y que además este compuesto con un `Usuario`, para saber qué `Usuario` dio el problema. Permite además que se pueda incluir la causa, es decir, sobrecarga el constructor para tener una versión que permita añadir la causa subyacente. 
+
+Las excepciones personalizadas permiten representar errores específicos del dominio de la aplicación. Al ser objetos, pueden contener información adicional que ayude a diagnosticar el problema, como el usuario implicado o la causa original del error.
+
+Una excepción no controlada en Java se crea extendiendo RuntimeException. Esto evita la obligación de declararla o capturarla explícitamente, aunque sigue pudiendo manejarse si se desea.
+
+public class Usuario {
+    private String nombre;
+
+    public Usuario(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+}
+
+public class UsuarioNoEncontradoException extends RuntimeException {
+
+    private final Usuario usuario;
+
+    public UsuarioNoEncontradoException(Usuario usuario) {
+        super("Usuario no encontrado: " + usuario.getNombre());
+        this.usuario = usuario;
+    }
+
+    public UsuarioNoEncontradoException(Usuario usuario, Throwable causa) {
+        super("Usuario no encontrado: " + usuario.getNombre(), causa);
+        this.usuario = usuario;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+}
+
+En este ejemplo, la excepción incluye el objeto Usuario que provocó el error, y también permite almacenar una causa subyacente mediante sobrecarga del constructor, facilitando el rastreo de errores en sistemas más complejos.
+
+
+## 10. Herencia vs. Composición. Se dice que no se debe emplear herencia simplemente por reutilizar código, es decir, que si quiero reutilizar código simplemente, no debo pensar en herencia como primera opción ¿por qué?
+
+La herencia no debe usarse únicamente como mecanismo de reutilización de código porque implica una relación semántica fuerte del tipo “es-un”. Si esta relación no es real, el diseño se vuelve incorrecto y difícil de mantener, ya que las subclases quedan acopladas a la estructura de la superclase.
+
+Cuando se usa herencia solo para reutilizar código, se corre el riesgo de forzar jerarquías artificiales. Esto puede provocar que futuras modificaciones en la clase base afecten a clases que no deberían verse impactadas, rompiendo el principio de diseño abierto/cerrado.
+
+Por este motivo, en muchos casos es preferible utilizar composición, donde una clase contiene a otra y reutiliza su funcionalidad sin heredar su jerarquía. Esto reduce el acoplamiento y hace el diseño más flexible y fácil de evolucionar.
+
+
+## 11. Herencia vs. Composición. Se dice que se debe *"favorecer la composición frente a la herencia"*, ¿por qué?
+
+Se favorece la composición frente a la herencia porque la composición proporciona mayor flexibilidad en el diseño de software. En lugar de depender de una jerarquía rígida, una clase puede combinar diferentes comportamientos simplemente utilizando objetos internos.
+
+La herencia introduce un acoplamiento fuerte entre clases, ya que las subclases dependen directamente de la implementación de la superclase. Esto puede dificultar cambios futuros, porque modificar la clase base puede afectar a todas sus subclases de forma inesperada.
+
+En cambio, con composición, las relaciones son más flexibles y reemplazables en tiempo de diseño. Esto permite cambiar comportamientos sin modificar jerarquías completas, lo que mejora la mantenibilidad, reutilización y extensibilidad del sistema.
+
