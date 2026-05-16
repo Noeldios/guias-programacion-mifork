@@ -2524,4 +2524,171 @@ public class Main {
 En ambos casos, el método transformar desconoce cómo se realiza realmente la transformación. Simplemente recibe una función y la ejecuta. Esto desacopla el algoritmo general del comportamiento concreto, aumentando reutilización y flexibilidad.
 
 
+## 6. Ahora, invoca `transformar`, con una nueva función lambda directamente en la llamada a `transformar`, por ejemplo, una función lambda que invierta la cadena. Define la función de inversión justo cuando la estás pasando como parámetro.
+
+Las funciones lambda pueden definirse directamente en el momento en el que se necesitan, sin almacenarlas previamente en una variable. Esto resulta muy útil cuando la función es pequeña y solo va a utilizarse una vez.
+
+Este estilo favorece código más compacto y declarativo, ya que el comportamiento concreto aparece justo en el lugar donde se emplea. Es una práctica muy habitual en programación funcional y en APIs modernas basadas en callbacks.
+
+En JavaScript:
+
+function transformar(texto, funcion) {
+    return funcion(texto);
+}
+
+console.log(
+    transformar(
+        "hola",
+        texto => texto
+            .split("")
+            .reverse()
+            .join("")
+    )
+);
+
+En Java:
+
+import java.util.function.Function;
+
+public class Main {
+
+    public static String transformar(
+            String texto,
+            Function<String, String> funcion) {
+
+        return funcion.apply(texto);
+    }
+
+    public static void main(String[] args) {
+
+        System.out.println(
+            transformar(
+                "hola",
+                s -> new StringBuilder(s)
+                        .reverse()
+                        .toString()
+            )
+        );
+    }
+}
+
+En ambos casos, la lambda que invierte la cadena se define directamente como argumento del método transformar, evitando crear variables auxiliares innecesarias.
+
+
+## 7. ¿Qué se entiende por cierre o "closure" en el contexto de las funciones lambda? Pon un ejemplo en Java de cómo una función lambda es capaz de acceder a una variable local en el contexto donde fue definida. Modifica el ejemplo anterior, creando otra función lambda para transformar una cadena, pero que lo que haga es concatenar a la cadena de entrada otra cadena que está en una variable local definida fuera de la función lambda.
+
+Un cierre o closure es una función que conserva acceso a las variables del contexto donde fue creada, incluso aunque posteriormente se ejecute en otro lugar. Esto significa que una lambda puede “recordar” variables externas utilizadas durante su definición.
+
+En Java, las lambdas pueden acceder a variables locales externas siempre que sean efectivamente finales (effectively final), es decir, que no cambien después de inicializarse.
+
+import java.util.function.Function;
+
+public class Main {
+
+    public static String transformar(
+            String texto,
+            Function<String, String> funcion) {
+
+        return funcion.apply(texto);
+    }
+
+    public static void main(String[] args) {
+
+        String sufijo = "!!!";
+
+        Function<String, String>
+        concatenar =
+            s -> s + sufijo;
+
+        System.out.println(
+            transformar(
+                "Hola",
+                concatenar
+            )
+        );
+    }
+}
+
+En este ejemplo, la lambda utiliza la variable local sufijo, aunque dicha variable está definida fuera de la propia función lambda. La lambda “captura” esa variable del entorno donde fue creada, formando un closure.
+
+Este mecanismo permite construir funciones configurables y dinámicas, ya que el comportamiento de la lambda puede depender de información externa almacenada en su contexto de creación.
+
+
+## 8. Reflexiona: ¿en qué se diferencia entonces una función lambda de los punteros a funciones que hay en C?
+
+Aunque ambos mecanismos permiten referenciar funciones indirectamente, existen diferencias importantes entre los punteros a función de C y las funciones lambda modernas.
+
+Un puntero a función en C únicamente almacena la dirección de memoria de una función ya existente. No captura variables del entorno ni conserva contexto adicional. La función llamada siempre es completamente independiente del lugar donde se usa.
+
+En cambio, las funciones lambda pueden actuar como closures, capturando variables externas y conservando estado asociado a su contexto de creación. Esto permite construir funciones dinámicas cuyo comportamiento depende de datos externos.
+
+Además, las lambdas suelen integrarse con sistemas de tipos más avanzados. En Java, por ejemplo, una lambda tiene un tipo asociado mediante interfaces funcionales, permitiendo chequeo estático de tipos y mejor integración con programación orientada a objetos y genericidad.
+
+
+## 9. Devolvamos ahora funciones. Creemos ahora una función que sea capaz de crear funciones "descuento". Una función "descuento", decrementa un porcentaje pasado como parámetro. Por simplicidad, usa `Function<Double, Double>` para su tipo. La función `crearDescuento(porcentaje)`, recibe solo el porcentaje de descuento a aplicar y devuelve la función de descuento. Prueba a crear dos descuentos distintos y aplicarlos a una cantidad. Explica la closure en la función descuento.
+
+Las funciones lambda no solo pueden recibirse como parámetros, sino también devolverse como resultado. Esto permite crear funciones dinámicamente y personalizar su comportamiento en función de ciertos datos iniciales.
+
+En este ejemplo, la función crearDescuento recibe un porcentaje y devuelve una nueva función capaz de aplicar dicho descuento sobre cualquier cantidad.
+
+import java.util.function.Function;
+
+public class Main {
+
+    public static Function<Double, Double>
+    crearDescuento(double porcentaje) {
+
+        return cantidad ->
+            cantidad -
+            (cantidad * porcentaje / 100);
+    }
+
+    public static void main(String[] args) {
+
+        Function<Double, Double>
+        descuento10 =
+            crearDescuento(10);
+
+        Function<Double, Double>
+        descuento25 =
+            crearDescuento(25);
+
+        System.out.println(
+            descuento10.apply(200.0)
+        );
+
+        System.out.println(
+            descuento25.apply(200.0)
+        );
+    }
+}
+
+Cada llamada a crearDescuento genera una lambda distinta. La closure aparece porque cada lambda captura el valor de porcentaje existente cuando fue creada.
+
+Por ello, descuento10 conserva internamente el valor 10, mientras que descuento25 conserva 25. Aunque ambas usan el mismo código, cada función mantiene su propio contexto capturado.
+
+
+## 10. En Java, que es un lenguaje con comprobación estática de tipos, donde los tipos se declaran, toda función lambda tiene un tipo, que se conoce como **interfaz funcional**. ¿Qué es una **interfaz funcional**? ¿Qué requisitos tiene?
+
+Una interfaz funcional es una interfaz que contiene exactamente un único método abstracto. En Java, las funciones lambda se apoyan en este tipo de interfaces para definir su tipo estático.
+
+El compilador utiliza la firma del único método abstracto para deducir qué parámetros recibe la lambda y qué valor devuelve. Por ello, una lambda puede verse como una implementación compacta de una interfaz funcional.
+
+Por ejemplo:
+
+@FunctionalInterface
+public interface Transformador {
+
+    String transformar(String s);
+}
+Transformador t =
+    s -> s.toUpperCase();
+
+Aquí, la lambda implementa automáticamente el método transformar.
+
+El requisito fundamental es tener un único método abstracto. Sin embargo, sí se permiten métodos default, static o heredados de Object, ya que no cuentan como métodos abstractos adicionales.
+
+La anotación @FunctionalInterface no es obligatoria, pero resulta recomendable porque permite al compilador detectar errores si accidentalmente se añade un segundo método abstracto.
+
+
 
