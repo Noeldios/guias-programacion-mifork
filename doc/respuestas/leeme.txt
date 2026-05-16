@@ -2363,5 +2363,165 @@ Una regla habitual para recordar su uso es:
 Producer extends → si la estructura “produce” datos para leer.
 Consumer super → si la estructura “consume” datos que se insertan.
 
+# TEMA 7. Aspectos funcionales
+
+## 1. ¿Qué es un puntero a una función? Pon un ejemplo de código en C, donde se define una función y que reciba una cadena de caracteres como parámetro y devuelva la cadena en mayúsculas. Crea un puntero en una variable local a dicha función llamado `aMayusculas` e invócala con el puntero.
+
+Un puntero a función en C es una variable capaz de almacenar la dirección de memoria de una función. Esto permite tratar funciones de manera similar a datos, pudiendo almacenarlas en variables, pasarlas como parámetros o devolverlas desde otras funciones.
+
+Los punteros a función son muy utilizados para implementar comportamientos configurables, callbacks o algoritmos genéricos. Aunque su sintaxis puede resultar compleja inicialmente, conceptualmente funcionan igual que un puntero normal, pero apuntando a código ejecutable en lugar de datos.
+
+#include <stdio.h>
+#include <ctype.h>
+
+char* convertirAMayusculas(char* texto) {
+
+    for (int i = 0; texto[i] != '\0'; i++) {
+        texto[i] = toupper(texto[i]);
+    }
+
+    return texto;
+}
+
+int main() {
+
+    char texto[] = "hola mundo";
+
+    char* (*aMayusculas)(char*);
+
+    aMayusculas = convertirAMayusculas;
+
+    printf("%s\n", aMayusculas(texto));
+
+    return 0;
+}
+
+En este ejemplo, aMayusculas almacena la dirección de la función convertirAMayusculas. Posteriormente, la función se invoca usando el propio puntero, demostrando que las funciones pueden manipularse indirectamente mediante referencias.
+
+
+## 2. ¿Qué es una **función lambda** en un lenguaje de programación? Pon un ejemplo similar al anterior en Javascript y otro en Java con funciones lambda. Usa una variable local `aMayusculas` para apuntar a la función lambda. Por simplicidad, en Java, emplea `Function<String, String>` para el tipo de la referencia a la función lambda.
+
+Una función lambda es una función anónima que puede definirse directamente dentro de una expresión y almacenarse en variables o pasarse como argumento. Su objetivo principal es simplificar la escritura de funciones pequeñas y favorecer estilos de programación funcional.
+
+Las lambdas permiten tratar funciones como valores. Esto resulta especialmente útil cuando se desea parametrizar comportamiento sin necesidad de crear clases completas o métodos auxiliares separados.
+
+En JavaScript, las funciones son ciudadanos de primera clase, por lo que pueden almacenarse directamente en variables:
+
+const aMayusculas = (texto) => {
+    return texto.toUpperCase();
+};
+
+console.log(
+    aMayusculas("hola mundo")
+);
+
+En Java, las funciones lambda aparecieron oficialmente en Java 8 y normalmente se utilizan junto con interfaces funcionales como Function<T,R>.
+
+import java.util.function.Function;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        Function<String, String>
+        aMayusculas =
+            texto -> texto.toUpperCase();
+
+        System.out.println(
+            aMayusculas.apply("hola mundo")
+        );
+    }
+}
+
+En ambos ejemplos, la variable aMayusculas referencia una función anónima capaz de transformar una cadena en mayúsculas. Esto permite manipular funciones de forma similar a otros datos del programa.
+
+
+## 3. ¿Qué es el **paradigma funcional**? ¿Por qué a algunos lenguajes orientados a objetos como Java 8, se les llama multi-paradigma? ¿Qué quiere decir que las funciones son "ciudadanos de primera clase"?
+
+El paradigma funcional es un estilo de programación basado en el uso de funciones como elemento principal de construcción de programas. Se centra en aplicar funciones sobre datos, evitando en muchos casos estados mutables y efectos secundarios.
+
+En programación funcional, las operaciones suelen expresarse declarativamente, indicando qué se desea obtener en lugar de describir paso a paso cómo hacerlo. Esto favorece código más modular, reutilizable y fácil de razonar.
+
+Lenguajes como Java 8 se consideran multi-paradigma porque permiten combinar orientación a objetos con elementos funcionales, como funciones lambda, streams o referencias a métodos. Esto significa que un mismo lenguaje soporta diferentes estilos de programación simultáneamente.
+
+Decir que las funciones son “ciudadanos de primera clase” significa que pueden tratarse igual que otros valores del lenguaje: almacenarse en variables, enviarse como parámetros, devolverse desde funciones o incluirse en estructuras de datos.
+
+
+## 4. Explica la sintaxis básica de una función lambda en Java.
+
+La sintaxis básica de una función lambda en Java se basa en tres partes: parámetros, operador -> y cuerpo de la función. El operador -> separa la entrada de la operación que se ejecutará.
+
+La forma general es:
+
+(parametros) -> expresion
+
+o bien:
+
+(parametros) -> {
+    instrucciones
+}
+
+Cuando el cuerpo contiene una única expresión, puede escribirse de forma abreviada sin llaves ni return. Por ejemplo:
+
+x -> x * 2
+
+En cambio, si el cuerpo tiene varias instrucciones, deben utilizarse llaves:
+
+(x) -> {
+    int y = x * 2;
+    return y;
+}
+
+Las lambdas en Java siempre se apoyan en interfaces funcionales, es decir, interfaces que contienen un único método abstracto. Por ello, el compilador puede deducir automáticamente qué método representa la lambda.
+
+
+## 5. Ahora recibamos una función como parámetro a un método y la llamaremos desde dentro. Amplia los ejemplos anteriores de Java y JavaScript con un método llamado `transformar`, que reciba un `String` como parámetro y luego una función transformadora como lo es `aMayúsculas` y la invoque desde dentro.
+
+Uno de los usos más importantes de las funciones lambda es poder pasar comportamiento como parámetro. Esto permite escribir métodos reutilizables cuyo comportamiento concreto depende de la función recibida.
+
+En JavaScript, como las funciones son valores normales del lenguaje, pueden recibirse directamente como parámetros:
+
+function transformar(texto, funcion) {
+    return funcion(texto);
+}
+
+const aMayusculas = (texto) => {
+    return texto.toUpperCase();
+};
+
+console.log(
+    transformar("hola", aMayusculas)
+);
+
+En Java ocurre algo parecido utilizando interfaces funcionales como Function<String,String>.
+
+import java.util.function.Function;
+
+public class Main {
+
+    public static String transformar(
+            String texto,
+            Function<String, String> funcion) {
+
+        return funcion.apply(texto);
+    }
+
+    public static void main(String[] args) {
+
+        Function<String, String>
+        aMayusculas =
+            s -> s.toUpperCase();
+
+        System.out.println(
+            transformar(
+                "hola",
+                aMayusculas
+            )
+        );
+    }
+}
+
+En ambos casos, el método transformar desconoce cómo se realiza realmente la transformación. Simplemente recibe una función y la ejecuta. Esto desacopla el algoritmo general del comportamiento concreto, aumentando reutilización y flexibilidad.
+
 
 
