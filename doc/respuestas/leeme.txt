@@ -2691,4 +2691,279 @@ El requisito fundamental es tener un único método abstracto. Sin embargo, sí 
 La anotación @FunctionalInterface no es obligatoria, pero resulta recomendable porque permite al compilador detectar errores si accidentalmente se añade un segundo método abstracto.
 
 
+## 11. Creemos una interfaz funcional a mano. Por ejemplo, define la interfaz funcional del ejemplo que transforma la cadena en otra. Llámale `Transformador`, que define una función que convierte una cadena de texto (`String`) en otra (`String`).
+
+Una interfaz funcional es una interfaz con un único método abstracto, lo que permite que pueda ser implementada mediante una función lambda. En este caso, se define una interfaz Transformador cuyo objetivo es representar cualquier operación que transforme un String en otro String.
+
+Este diseño permite desacoplar el concepto de transformación del tipo concreto de transformación aplicada, lo que facilita reutilización y programación funcional.
+
+@FunctionalInterface
+public interface Transformador {
+
+    String transformar(String texto);
+}
+
+Una vez definida, puede utilizarse con lambdas directamente, ya que el compilador sabe que cualquier lambda asignada debe cumplir esa firma.
+
+Transformador t =
+    s -> s.toUpperCase();
+
+
+## 12. Ahora hagamos la interfaz funcional algo más genérica y empleando generics, para que permita definir un `Transformador` de un tipo en otro. Pon un ejemplo de un transformador que redondea un `Double` en un `Integer`.
+
+Al introducir genericidad, la interfaz deja de estar limitada a cadenas y pasa a poder transformar cualquier tipo en otro. Esto permite reutilización máxima del concepto de transformación.
+
+La interfaz pasa a tener dos parámetros de tipo: uno de entrada y otro de salida.
+
+@FunctionalInterface
+public interface Transformador<T, R> {
+
+    R transformar(T valor);
+}
+
+Este diseño es equivalente a muchas interfaces funcionales estándar de Java, como Function<T, R>, lo que muestra su carácter general.
+
+Un ejemplo concreto puede ser un transformador de Double a Integer mediante redondeo:
+
+Transformador<Double, Integer> redondear =
+    x -> (int) Math.round(x);
+
+Este transformador convierte un número decimal en entero aplicando una operación matemática concreta, manteniendo la reutilización del mismo tipo de interfaz.
+
+
+## 13. `Transformador`, en su versión genérica, parece muy útil y reutilizable, hasta el punto de que es igual a una interfaz funcional que ya hay, que es `Function<T, R>`. Muestra las interfaces funcionales predefinidas que hay en Java.
+
+Java incluye en el paquete java.util.function un conjunto amplio de interfaces funcionales predefinidas diseñadas para cubrir los casos más comunes de programación funcional.
+
+Estas interfaces evitan tener que definir continuamente interfaces funcionales personalizadas como Transformador, ya que ya existen versiones genéricas y optimizadas para distintos patrones de uso.
+
+Las principales interfaces funcionales son:
+
+Function<T, R> → transforma un valor en otro
+Consumer<T> → consume un valor sin devolver resultado
+Supplier<T> → produce un valor sin recibir parámetros
+Predicate<T> → evalúa una condición booleana
+UnaryOperator<T> → transforma un valor en otro del mismo tipo
+BinaryOperator<T> → combina dos valores del mismo tipo
+
+Estas interfaces permiten construir código funcional expresivo y reutilizable sin necesidad de definir estructuras adicionales.
+
+Su uso, combinado con lambdas y streams, constituye la base del estilo funcional en Java moderno.
+
+
+## 14. Vamos a ver ejemplos expresivos de funcional en Java. Estudiemos el `List.forEach`, como versión funcional del bucle `for`. Emplea el `forEach` para recorrer una lista de `Integer` y que muestre un mensaje si el entero es positivo.
+
+El método forEach permite recorrer colecciones de forma declarativa, sustituyendo el bucle tradicional for. En lugar de describir el recorrido explícito, se indica qué operación debe aplicarse a cada elemento.
+
+Este método recibe un Consumer<T>, es decir, una función que consume cada elemento sin devolver resultado.
+
+import java.util.List;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        List<Integer> nums =
+            List.of(-2, 5, 0, 8, -1);
+
+        nums.forEach(n -> {
+            if (n > 0) {
+                System.out.println(
+                    n + " es positivo"
+                );
+            }
+        });
+    }
+}
+
+En este ejemplo, cada elemento de la lista se procesa mediante una lambda, lo que elimina la necesidad de escribir un bucle explícito y mejora la expresividad del código.
+
+## 15. Repasando el tema de genericidad, fíjate en la firma de `forEach`, ¿por qué se usa `Consumer<? super T>` y no `Consumer<T>`? Explica qué significa **PECS**, y explícalo para el caso de mejorar el ejemplo del método `transformar` la hora de definir el tipo de la función transformadora.
+
+El uso de Consumer<? super T> en lugar de Consumer<T> se debe a la necesidad de permitir mayor flexibilidad en los tipos aceptados por el método. Esto se relaciona directamente con el principio PECS (Producer Extends, Consumer Super).
+
+Un Consumer es un consumidor de valores, es decir, recibe datos. Por ello, se usa super, ya que permite aceptar no solo T, sino también cualquier supertipo de T. Esto hace el método más flexible y reutilizable.
+
+Por ejemplo, si se tiene una lista de Integer, se puede usar un Consumer<Number> o Consumer<Object> sin problema:
+
+List<Integer> nums = List.of(1, 2, 3);
+
+Consumer<Number> c =
+    n -> System.out.println(n);
+
+nums.forEach(c);
+
+En cambio, si se usara Consumer<T>, solo se aceptaría exactamente Consumer<Integer>, perdiendo flexibilidad.
+
+Aplicando esto al método transformar, si se quisiera generalizar, se podría definir como:
+
+public static <T, R> R transformar(
+        T valor,
+        Function<? super T, ? extends R> f) {
+
+    return f.apply(valor);
+}
+
+Aquí se aplica PECS:
+
+? super T porque la función consume T
+? extends R porque el resultado se produce
+
+Esto permite mayor compatibilidad con funciones más generales sin perder seguridad de tipos.
+
+## 16. Referencias a métodos. Podemos obtener una referencia a métodos de objetos o clases. Pon un ejemplo en JavaScript y en Java, de una clase `Persona` con un método `saludar`. En el código principal, crea una `Persona` con un nombre, y obtén una referencia a su método `saludar` en una variable local. Invoca `saludar` con esa referencia a su método `saludar`.
+
+Las referencias a métodos permiten reutilizar métodos existentes como si fueran funciones, sin necesidad de envolverlos en lambdas explícitas. Esto es una forma más compacta de programación funcional.
+
+En JavaScript, los métodos pueden desacoplarse fácilmente de sus objetos:
+
+class Persona {
+    constructor(nombre) {
+        this.nombre = nombre;
+    }
+
+    saludar() {
+        console.log("Hola, soy " + this.nombre);
+    }
+}
+
+const p = new Persona("Ana");
+
+const f = p.saludar.bind(p);
+
+f();
+
+En Java, se utilizan referencias a métodos con el operador ::, manteniendo el contexto del objeto.
+
+import java.util.function.Supplier;
+
+public class Persona {
+
+    private String nombre;
+
+    public Persona(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void saludar() {
+        System.out.println(
+            "Hola, soy " + nombre
+        );
+    }
+
+    public static void main(String[] args) {
+
+        Persona p =
+            new Persona("Ana");
+
+        Runnable r =
+            p::saludar;
+
+        r.run();
+    }
+}
+
+En ambos casos, el método saludar se utiliza como una función independiente asociada al objeto
+
+
+## 17. ¿Qué tipos de referencias a método se pueden hacer en Java? Pon un ejemplo de referencia a método estático, a constructor, a método de instancia de una instancia concreta y a método de instancia sobre cualquier instancia.
+
+Java permite varios tipos de referencias a métodos, que simplifican la escritura de lambdas cuando la operación ya existe como método.
+
+Los principales tipos son:
+
+Referencia a método estático
+Referencia a método de instancia de un objeto concreto
+Referencia a método de instancia de un tipo arbitrario
+Referencia a constructor
+
+Ejemplos:
+
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.function.Consumer;
+
+public class Ejemplos {
+
+    public static int cuadrado(int x) {
+        return x * x;
+    }
+
+    public void imprimir(String s) {
+        System.out.println(s);
+    }
+
+    public static void main(String[] args) {
+
+        // método estático
+        Function<Integer, Integer> f1 =
+            Ejemplos::cuadrado;
+
+        // constructor
+        Supplier<StringBuilder> f2 =
+            StringBuilder::new;
+
+        // instancia concreta
+        Ejemplos e = new Ejemplos();
+        Consumer<String> f3 =
+            e::imprimir;
+
+        // instancia de tipo arbitrario
+        Function<String, String> f4 =
+            String::toUpperCase;
+    }
+}
+
+Cada tipo de referencia reduce la necesidad de escribir lambdas explícitas y mejora la legibilidad del código funcional.
+
+## 18. Otro ejemplo expresivo. Ordena una lista de `Persona`, cada persona tiene un nombre y una edad (de tipo entero). Ordena la lista de `Persona` con `Collections.sort`, pasándole como comparador una expresión lambda que compare la edad de ambas personas y si tienen la misma edad, se ordene por orden alfabético del nombre. Crea dos versiones: Una con la función de comparación hecha manualmente, y otra empleando `Comparator`.
+
+El ordenamiento con programación funcional permite definir criterios de comparación de forma directa mediante lambdas o utilizando utilidades de Comparator.
+
+Primero se define la clase Persona:
+
+class Persona {
+
+    String nombre;
+    int edad;
+
+    Persona(String n, int e) {
+        nombre = n;
+        edad = e;
+    }
+}
+Versión 1: lambda manual
+import java.util.*;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        List<Persona> lista = new ArrayList<>();
+
+        lista.add(new Persona("Ana", 20));
+        lista.add(new Persona("Luis", 20));
+        lista.add(new Persona("Carlos", 18));
+
+        Collections.sort(lista, (p1, p2) -> {
+
+            if (p1.edad != p2.edad) {
+                return p1.edad - p2.edad;
+            }
+
+            return p1.nombre.compareTo(p2.nombre);
+        });
+    }
+}
+Versión 2: usando Comparator
+Collections.sort(
+    lista,
+    Comparator
+        .comparingInt((Persona p) -> p.edad)
+        .thenComparing(p -> p.nombre)
+);
+
+En la segunda versión se utiliza Comparator para expresar el criterio de ordenación de forma más declarativa y legible. Esto reduce errores y mejora la expresividad del código, ya que se reutilizan métodos ya definidos en la API estándar.
+
+
 
