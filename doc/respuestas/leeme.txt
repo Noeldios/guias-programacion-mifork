@@ -1949,4 +1949,217 @@ En ambos lenguajes se consigue reutilización de estructuras de datos y segurida
 
 
 
+## 6. Sobre el funcionamiento de la programación genérica. ¿Qué hace el compilador cuando se instancia una clase que tiene parámetros de tipo? ¿Hace lo mismo C++ y Java? ¿Qué es el "type erasure" de Java y la "instanciación de plantillas" de C++?
+
+Cuando se utiliza programación genérica, el compilador debe transformar el código genérico en código ejecutable concreto. Para ello, sustituye los parámetros de tipo por tipos reales y comprueba que las operaciones realizadas sean compatibles con dichos tipos.
+
+Sin embargo, Java y C++ implementan este proceso de manera distinta. En Java, los generics utilizan un mecanismo llamado type erasure (borrado de tipos). Esto significa que, durante la compilación, la información genérica se usa para verificar tipos, pero posteriormente se elimina y el código generado trabaja realmente con referencias de tipo Object o con el límite superior indicado.
+
+Por ejemplo:
+
+List<String> textos = new ArrayList<>();
+
+Tras el type erasure, el compilador genera internamente algo equivalente a:
+
+List textos = new ArrayList();
+
+añadiendo automáticamente los cast necesarios donde corresponda.
+
+En C++, en cambio, los templates funcionan mediante instanciación de plantillas. El compilador genera versiones reales y separadas del código para cada tipo utilizado. Por ejemplo, un vector<string> y un vector<int> producen implementaciones distintas en el código compilado.
+
+Esto hace que C++ conserve completamente la información de tipos en tiempo de compilación, mientras que Java sacrifica parte de ella para mantener compatibilidad con versiones antiguas de la máquina virtual y de la API.
+
+
+## 7. Vamos a crear una nueva clase con parámetros de tipo. Define en Java una clase `Par`, que permite alojar dos valores de tipos diferentes. Incluye un constructor y un getter para cada tipo. Pon un ejemplo de uso de ese `Par`, por ejemplo para especificar el tipo de retorno de una función que devuelve en un `Par` la media y desviación típica de un array de `double`. 
+
+Los parámetros de tipo permiten definir clases reutilizables capaces de trabajar con distintos tipos concretos manteniendo seguridad de tipos. En este caso, se define una clase Par capaz de almacenar dos valores potencialmente diferentes.
+
+public class Par<T1, T2> {
+
+    private T1 primero;
+    private T2 segundo;
+
+    public Par(T1 primero, T2 segundo) {
+        this.primero = primero;
+        this.segundo = segundo;
+    }
+
+    public T1 getPrimero() {
+        return primero;
+    }
+
+    public T2 getSegundo() {
+        return segundo;
+    }
+}
+
+La clase puede utilizarse para representar el retorno de funciones que necesiten devolver varios resultados simultáneamente. Por ejemplo, una función estadística que devuelve media y desviación típica.
+
+public class Estadistica {
+
+    public static Par<Double, Double>
+    calcular(double[] datos) {
+
+        double suma = 0;
+
+        for (double d : datos) {
+            suma += d;
+        }
+
+        double media = suma / datos.length;
+
+        double sumaDif = 0;
+
+        for (double d : datos) {
+            double dif = d - media;
+            sumaDif += dif * dif;
+        }
+
+        double desviacion =
+            Math.sqrt(sumaDif / datos.length);
+
+        return new Par<>(media, desviacion);
+    }
+}
+public class Main {
+
+    public static void main(String[] args) {
+
+        double[] datos = {2, 4, 6, 8};
+
+        Par<Double, Double> r =
+            Estadistica.calcular(datos);
+
+        System.out.println(
+            "Media: " + r.getPrimero()
+        );
+
+        System.out.println(
+            "Desviación: " + r.getSegundo()
+        );
+    }
+}
+
+Gracias a los generics, el compilador sabe exactamente qué tipo almacena cada posición del Par, evitando conversiones inseguras y mejorando la legibilidad del código.
+
+
+## 8. En Java, se pueden declarar parámetros de tipo también a nivel de método, no solo a nivel de clase. Pon un ejemplo con un método genérico `seleccionaUno`, que pasados dos objetos del mismo tipo, te devuelva aleatoriamente uno de ellos. Muestra la diferencia de definirlo con dos `Object`, a definirlo con dos parámetros de tipo, en terminos de (i) evitar downcasting y (ii) forzar que ambos objetos sean del mismo tipo. 
+
+En Java, los parámetros de tipo pueden declararse también directamente en métodos. Esto permite crear operaciones genéricas sin necesidad de que toda la clase sea genérica.
+
+Una primera versión basada en Object permite reutilización, pero pierde seguridad de tipos y obliga a realizar downcasting manual.
+
+public static Object seleccionaUno(
+        Object a,
+        Object b) {
+
+    if (Math.random() < 0.5) {
+        return a;
+    }
+
+    return b;
+}
+String s =
+    (String) seleccionaUno("Hola", "Adiós");
+
+El compilador no puede garantizar que ambos parámetros sean del mismo tipo ni evitar conversiones inseguras.
+
+Con parámetros de tipo, el método mantiene la información de tipos y evita esos problemas.
+
+public static <T> T seleccionaUno(
+        T a,
+        T b) {
+
+    if (Math.random() < 0.5) {
+        return a;
+    }
+
+    return b;
+}
+String s =
+    seleccionaUno("Hola", "Adiós");
+
+En esta segunda versión, el compilador sabe que el retorno es un String, por lo que no se necesita downcasting. Además, se fuerza que ambos parámetros sean compatibles con el mismo tipo T, aumentando la seguridad del programa.
+
+
+## 9. ¿Se pueden establecer restricciones en los parámetros de tipo? Por ejemplo, si quiero definir un tipo genérico `<T>`, ¿puedo decir que tenga que ser, al menos, un número para poder tratarlo como tal? Pon un ejemplo en Java de un `Punto` con dos coordenadas, metodos `getX`, `getY`, y una función `calcularDistanciaA` otro `Punto`. Permite que esas coordenadas sean cualquier tipo de número. Pon dos soluciones: una simplemente creando coordenadas de tipo `Number` y otra añadiendo generics para reforzar el chequeo de tipos y saber exactamente con qué tipo de número trabaja el `Punto`. En este caso y respecto al "type erasure", ¿cuál es el tipo final tras la compilación?
+
+Sí, Java permite establecer restricciones sobre parámetros de tipo mediante límites (bounds). Esto permite indicar que un tipo genérico debe heredar de una determinada clase o implementar una interfaz concreta.
+
+Por ejemplo, puede indicarse que T debe ser al menos un Number, permitiendo usar operaciones numéricas comunes como doubleValue().
+
+Una primera solución consiste simplemente en utilizar Number directamente.
+
+public class Punto {
+
+    private Number x;
+    private Number y;
+
+    public Punto(Number x, Number y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public Number getX() {
+        return x;
+    }
+
+    public Number getY() {
+        return y;
+    }
+
+    public double calcularDistanciaA(Punto p) {
+
+        double dx =
+            p.x.doubleValue() - x.doubleValue();
+
+        double dy =
+            p.y.doubleValue() - y.doubleValue();
+
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+}
+
+Esta solución es flexible, pero pierde precisión sobre el tipo exacto utilizado. El compilador no sabe si el punto trabaja con Integer, Double o Float.
+
+Con generics puede reforzarse el chequeo de tipos.
+
+public class Punto<T extends Number> {
+
+    private T x;
+    private T y;
+
+    public Punto(T x, T y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public T getX() {
+        return x;
+    }
+
+    public T getY() {
+        return y;
+    }
+
+    public double calcularDistanciaA(
+            Punto<T> p) {
+
+        double dx =
+            p.x.doubleValue() - x.doubleValue();
+
+        double dy =
+            p.y.doubleValue() - y.doubleValue();
+
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+}
+Punto<Double> p1 =
+    new Punto<>(1.0, 2.0);
+
+Punto<Double> p2 =
+    new Punto<>(4.0, 6.0);
+
+En este caso, el compilador sabe exactamente que el punto trabaja con Double. Sin embargo, debido al type erasure, tras la compilación el tipo genérico T desaparece y queda sustituido por su límite superior, es decir, Number.
+
 
