@@ -2163,3 +2163,205 @@ Punto<Double> p2 =
 En este caso, el compilador sabe exactamente que el punto trabaja con Double. Sin embargo, debido al type erasure, tras la compilación el tipo genérico T desaparece y queda sustituido por su límite superior, es decir, Number.
 
 
+## 10. Sobre las soluciones anteriores. Si bien ambas permiten trabajar con distintos tipos de número sin duplicar la clase `Punto`, reflexiona sobre el refuerzo del chequeo de tipos con generics. ¿Permiten ambas crear un punto con una coordenada de tipo entero y la otra coordenada de tipo real? ¿Qué tipo devuelve el `getX` con la solucion sin generics y qué tipo devuelve el que tiene la solución con generics?
+
+Ambas soluciones permiten reutilizar la clase Punto para trabajar con distintos tipos numéricos sin necesidad de duplicar código. Sin embargo, la versión basada únicamente en Number ofrece un chequeo de tipos mucho menos estricto que la versión basada en generics.
+
+En la solución sin generics, las coordenadas son simplemente de tipo Number, por lo que puede construirse un punto mezclando distintos tipos numéricos sin restricciones:
+
+Punto p =
+    new Punto(3, 4.5);
+
+Esto compila correctamente porque tanto Integer como Double son subtipos de Number.
+
+En cambio, en la solución genérica:
+
+Punto<Double> p =
+    new Punto<>(3.0, 4.5);
+
+el compilador obliga a que ambas coordenadas sean compatibles con el mismo tipo T. Esto refuerza el chequeo de tipos y evita mezclas accidentales de representaciones numéricas distintas.
+
+Además, el método getX() devuelve tipos diferentes en cada diseño. En la solución sin generics, el retorno es simplemente Number:
+
+Number x = p.getX();
+
+por lo que el compilador desconoce el tipo concreto real.
+
+En cambio, con generics el compilador conoce exactamente el tipo utilizado:
+
+Double x = p.getX();
+
+Esto mejora la seguridad de tipos, evita conversiones innecesarias y hace el código más expresivo y fácil de mantener.
+
+
+## 11. Hagamos un ejemplo avanzado. El siguiente código, con interfaz `Punto`, que define un método `calcularDistanciaA(Punto p)`, junto con las implementaciones `Punto2D` y `Punto3D`. Añade generics para asegurarnos que la sobreescritura del método calcular distancia a otro `Punto` siempre es sobre un `Punto` del mismo tipo, evitando `instanceof` y el downcasting.
+```java
+public interface Punto { 
+    public double distanciaA(Punto p); 
+} 
+
+public class Punto2D implements Punto { 
+     private final double x, y; 
+     public Punto2D(double x, double y) { 
+        this.x = x; this.y = y; 
+    } 
+
+    @Override 
+    public double distanciaA(Punto p) { 
+        if (p instanceof Punto2D) { 
+            Punto2D p2d = (Punto2D) p; 
+            return Math.sqrt(Math.pow(x - p2d.x, 2) 
+                    + Math.pow(y - p2d.y, 2)); 
+        } else { 
+            throw new RuntimeException("p debe ser Punto 2D"); 
+        } 
+    } 
+} 
+public class Punto3D implements Punto { 
+    // Igual que Punto2D, pero con tres coordenadas
+    ...
+} 
+```
+
+En el diseño original, el método recibe un Punto genérico, por lo que las implementaciones concretas deben comprobar manualmente el tipo mediante instanceof y realizar downcasting. Esto introduce complejidad y desplaza errores potenciales a tiempo de ejecución.
+
+Los generics permiten reforzar el chequeo de tipos haciendo que cada subtipo de punto solo pueda calcular distancias respecto a puntos de su mismo tipo. Así, el compilador detecta automáticamente usos incorrectos y desaparece la necesidad de instanceof.
+
+public interface Punto<T extends Punto<T>> {
+
+    double distanciaA(T p);
+}
+
+La interfaz utiliza un parámetro de tipo recursivo (T extends Punto<T>), indicando que el tipo concreto debe ser también un subtipo de Punto.
+
+public class Punto2D
+implements Punto<Punto2D> {
+
+    private final double x;
+    private final double y;
+
+    public Punto2D(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    @Override
+    public double distanciaA(Punto2D p) {
+
+        double dx = x - p.x;
+        double dy = y - p.y;
+
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+}
+public class Punto3D
+implements Punto<Punto3D> {
+
+    private final double x;
+    private final double y;
+    private final double z;
+
+    public Punto3D(
+            double x,
+            double y,
+            double z) {
+
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    @Override
+    public double distanciaA(Punto3D p) {
+
+        double dx = x - p.x;
+        double dy = y - p.y;
+        double dz = z - p.z;
+
+        return Math.sqrt(
+            dx * dx +
+            dy * dy +
+            dz * dz
+        );
+    }
+}
+
+Ahora el compilador impide automáticamente situaciones incorrectas como intentar calcular la distancia entre un Punto2D y un Punto3D. El chequeo pasa de tiempo de ejecución a tiempo de compilación, aumentando la seguridad del programa.
+
+
+## 12. Dado que `String` es subtipo de `Object`, ¿significa eso que `List<String>` es subtipo de `List<Object>`? ¿Y que `String[]` es subtipo de `Object[]`? Razona por qué la respuesta es diferente en cada caso y qué problema en tiempo de ejecución puede aparecer con los arrays. A partir de estos ejemplos, define qué significa que un tipo genérico sea **covariante**, **contravariante** o **invariante** respecto a su parámetro de tipo.
+
+Aunque String es subtipo de Object, en Java List<String> no es subtipo de List<Object>. Los tipos genéricos en Java son invariantes por defecto. Esto significa que la relación de herencia entre los parámetros de tipo no se traslada automáticamente al tipo genérico que los contiene.
+
+Por ejemplo, este código es ilegal:
+
+List<String> textos =
+    new ArrayList<>();
+
+List<Object> objetos = textos;
+
+Java lo prohíbe porque permitiría insertar objetos que no son String dentro de la lista.
+
+Sin embargo, con arrays ocurre algo distinto: String[] sí es subtipo de Object[]. Los arrays en Java son covariantes.
+
+String[] textos =
+    new String[5];
+
+Object[] objetos = textos;
+
+Esto compila correctamente, pero puede provocar errores en ejecución:
+
+objetos[0] = 123;
+
+Aunque objetos parece un Object[], realmente apunta a un String[]. Por ello, en ejecución aparece una excepción ArrayStoreException.
+
+A partir de estos ejemplos:
+
+Un tipo es covariante si conserva la relación de herencia entre tipos (String[] → Object[]).
+Un tipo es invariante si no existe relación entre versiones parametrizadas distintas (List<String> no es List<Object>).
+Un tipo es contravariante si la relación se invierte, algo que Java permite parcialmente mediante ? super T.
+
+
+## 13. Java permite recuperar covarianza y contravarianza en tipos genéricos de forma controlada mediante **wildcards**. ¿Qué es un wildcard (`?`)? Muestra la diferencia entre `List<? extends T>` y `List<? super T>`, indicando en qué casos se usa cada uno. Pon dos ejemplos: (i) un método que reciba una lista de números y calcule su suma, usando `? extends`; (ii) un método que reciba una lista y le añada varios números enteros, usando `? super`.
+
+Respuesta
+
+Un wildcard (?) representa un tipo desconocido dentro de un genérico. Permite trabajar con distintos tipos relacionados sin fijar exactamente cuál es el tipo concreto utilizado. Esto proporciona flexibilidad manteniendo seguridad de tipos.
+
+List<? extends T> expresa covarianza controlada. Significa “lista de algún subtipo de T”. Se utiliza principalmente cuando solo interesa leer elementos de la estructura. En cambio, List<? super T> expresa contravarianza controlada y significa “lista de algún supertipo de T”. Se utiliza cuando interesa insertar elementos.
+
+Un ejemplo típico de ? extends es recorrer listas numéricas sin importar el subtipo concreto:
+
+public static double sumar(
+        List<? extends Number> nums) {
+
+    double suma = 0;
+
+    for (Number n : nums) {
+        suma += n.doubleValue();
+    }
+
+    return suma;
+}
+
+Este método acepta listas de Integer, Double, Float, etc., porque todas contienen subtipos de Number.
+
+En cambio, ? super resulta útil para insertar valores:
+
+public static void agregarEnteros(
+        List<? super Integer> lista) {
+
+    lista.add(10);
+    lista.add(20);
+    lista.add(30);
+}
+
+Este método puede recibir List<Integer>, List<Number> o incluso List<Object>, ya que todos son capaces de almacenar enteros.
+
+Una regla habitual para recordar su uso es:
+
+Producer extends → si la estructura “produce” datos para leer.
+Consumer super → si la estructura “consume” datos que se insertan.
+
+
+
