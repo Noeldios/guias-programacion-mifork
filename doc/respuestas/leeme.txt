@@ -1772,3 +1772,181 @@ public interface FicheroEscribible extends Fichero {
 
 En este ejemplo, FicheroEscribible hereda el método leer() de Fichero y añade nuevas operaciones. Esto permite diseñar sistemas flexibles donde las clases pueden implementar solo las capacidades que necesiten sin quedar atadas a una jerarquía rígida.
 
+
+
+# TEMA 6. Genericidad
+
+## 1. Empleando `void*` en C o `Object` en Java, pon un ejemplo de una estructura de datos, que empleando un array primitivo, permita alojar cualquier tipo de dato.
+
+En C puede utilizarse void* para almacenar referencias a cualquier tipo de dato, ya que void* representa un puntero genérico. Esto permite construir estructuras de datos reutilizables, aunque el lenguaje pierde información sobre el tipo real almacenado.
+
+El siguiente ejemplo implementa una estructura sencilla basada en un array de punteros genéricos. Puede almacenar enteros, cadenas u otros tipos, aunque el programador debe recordar manualmente el tipo real de cada elemento.
+
+#include <stdio.h>
+
+struct Lista {
+    void* datos[10];
+    int numElementos;
+};
+
+void add(struct Lista* l, void* dato) {
+    l->datos[l->numElementos] = dato;
+    l->numElementos++;
+}
+
+int main() {
+
+    struct Lista lista;
+    lista.numElementos = 0;
+
+    int edad = 20;
+    char* nombre = "Ana";
+
+    add(&lista, &edad);
+    add(&lista, nombre);
+
+    printf("%d\n", *((int*) lista.datos[0]));
+    printf("%s\n", (char*) lista.datos[1]);
+
+    return 0;
+}
+
+
+En Java ocurre algo parecido usando Object, ya que todas las clases heredan de Object. Por ello, una estructura basada en Object[] puede almacenar cualquier objeto.
+
+public class Lista {
+
+    private Object[] datos = new Object[10];
+    private int numElementos = 0;
+
+    public void add(Object o) {
+        datos[numElementos] = o;
+        numElementos++;
+    }
+
+    public Object get(int pos) {
+        return datos[pos];
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        Lista lista = new Lista();
+
+        lista.add("Hola");
+        lista.add(25);
+
+        String texto = (String) lista.get(0);
+        Integer numero = (Integer) lista.get(1);
+
+        System.out.println(texto);
+        System.out.println(numero);
+    }
+}
+
+## 2. Brevemente, ¿Qué significa la **programación genérica**? ¿Es el ejemplo anterior un ejemplo básico de programación genérica? 
+
+La programación genérica consiste en crear algoritmos y estructuras de datos reutilizables que puedan trabajar con distintos tipos sin necesidad de duplicar código. El objetivo es escribir una única implementación válida para muchos tipos diferentes.
+
+Por ejemplo, una lista dinámica debería poder almacenar String, Integer o cualquier otro tipo sin crear una versión distinta de la lista para cada caso. La genericidad permite precisamente reutilizar la misma estructura de datos manteniendo flexibilidad.
+
+El ejemplo anterior sí puede considerarse un ejemplo básico de programación genérica, porque la estructura permite trabajar con distintos tipos de datos. Sin embargo, se trata de una genericidad poco segura, ya que el compilador no controla los tipos almacenados y obliga a realizar conversiones manuales (cast).
+
+Por este motivo, lenguajes modernos incorporan mecanismos más avanzados como los generics de Java o los templates de C++, que permiten mantener genericidad y seguridad de tipos simultáneamente.
+
+## 3. Indica los problemas respecto al chequeo de tipos, de emplear `void*` o `Object` cuando se crean estructuras de datos genéricas. 
+
+El principal problema de utilizar void* en C o Object en Java es la pérdida de información de tipos. La estructura puede almacenar cualquier dato, pero el compilador deja de saber qué tipo concreto contiene cada posición.
+
+Esto obliga a realizar conversiones manuales (casting) al recuperar los elementos. Si el programador se equivoca en el tipo real almacenado, pueden producirse errores en tiempo de ejecución. En C esto puede causar comportamientos impredecibles o corrupción de memoria, mientras que en Java normalmente aparece una excepción ClassCastException.
+
+Lista lista = new Lista();
+
+lista.add("Hola");
+
+Integer n = (Integer) lista.get(0);
+
+En este ejemplo, el código compila correctamente porque Object acepta cualquier objeto. Sin embargo, en ejecución se intentará convertir un String a Integer, provocando un error.
+
+Además, el código se vuelve menos legible y más difícil de mantener, ya que el tipo real de los datos no queda reflejado claramente en la estructura ni en sus métodos.
+
+
+## 4. Vamos entonces con mecanismos de mejora de la programación genérica ¿Qué son los **parámetros de tipo**? 
+
+Los parámetros de tipo son mecanismos que permiten definir clases, interfaces o métodos genéricos indicando tipos de manera abstracta. En lugar de trabajar directamente con Object, se utilizan símbolos como T, E o K que representan un tipo concreto que será especificado posteriormente.
+
+Esto permite crear estructuras reutilizables manteniendo seguridad de tipos. El compilador conoce el tipo concreto utilizado y puede detectar errores antes de ejecutar el programa, evitando conversiones inseguras.
+
+public class Caja<T> {
+
+    private T valor;
+
+    public void set(T valor) {
+        this.valor = valor;
+    }
+
+    public T get() {
+        return valor;
+    }
+}
+
+Caja<String> caja = new Caja<>();
+
+caja.set("Hola");
+
+String texto = caja.get();
+
+En este ejemplo, T actúa como parámetro de tipo. Cuando se instancia Caja<String>, el compilador sustituye T por String, permitiendo recuperar valores sin necesidad de casting explícito.
+
+
+## 5. En Java existe "generics", en C++ existen "templates". Pon un ejemplo de uso de programación genérica en ambos, instanciando una lista o vector dinámico que solo admite `String`. Introduce valores, y luego haz un recorrido de ellos mostrando cómo cada elemento es del tipo concreto con seguridad.
+
+En Java, los generics permiten parametrizar clases e interfaces indicando qué tipo concreto almacenarán. Esto hace posible que el compilador compruebe los tipos automáticamente y evite conversiones inseguras.
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        List<String> textos = new ArrayList<>();
+
+        textos.add("Hola");
+        textos.add("Mundo");
+
+        for (String s : textos) {
+            System.out.println(s.toUpperCase());
+        }
+    }
+}
+
+En este caso, la lista solo admite objetos String. El compilador impide introducir objetos de otros tipos y cada elemento recuperado ya es directamente un String, sin necesidad de casting.
+
+En C++, los templates proporcionan un mecanismo similar de genericidad. La biblioteca estándar incluye vector, que puede parametrizarse con el tipo deseado.
+
+#include <iostream>
+#include <vector>
+#include <string>
+
+int main() {
+
+    std::vector<std::string> textos;
+
+    textos.push_back("Hola");
+    textos.push_back("Mundo");
+
+    for (std::string s : textos) {
+        std::cout << s << std::endl;
+    }
+
+    return 0;
+}
+
+En ambos lenguajes se consigue reutilización de estructuras de datos y seguridad de tipos al mismo tiempo. El compilador detecta automáticamente usos incorrectos antes de ejecutar el programa, reduciendo muchos errores frecuentes de la programación genérica tradicional basada en Object o void*.
+
+
+
+
